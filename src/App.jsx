@@ -69,10 +69,25 @@ export default function App() {
         <Box>
           <WatchedSummary watched={watched} />
           <WatchedMoviesList watched={watched} />
-          <StarRating maxRating={5} />
+          <StarRating
+            maxRating={"skfkl"}
+            messages={["Terrible", "Bad", "Okay", "Good", "Amazing"]}
+          />
+          <StarRating maxRating={10} size={24} defaultRating={8} />
+          {/* <Test /> */}
         </Box>
       </Main>
     </>
+  );
+}
+
+function Test() {
+  const [movieRating, setMovieRating] = useState(0);
+  return (
+    <div>
+      <StarRating color="blue" maxRating={10} onSetRating={setMovieRating} />
+      <p>This movie is Rated {movieRating} stars</p>
+    </div>
   );
 }
 
