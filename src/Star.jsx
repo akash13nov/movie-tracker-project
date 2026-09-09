@@ -1,3 +1,5 @@
+import { useState } from "react";
+
 const starStyle = {
   width: "48px",
   height: "48px",
@@ -5,9 +7,15 @@ const starStyle = {
   cursor: "pointer",
 };
 
-const Star = ({ full, onRate }) => {
+const Star = ({ full, onRate, onHoverIn, onHoverOut }) => {
   return (
-    <span role="button" style={starStyle} onClick={onRate}>
+    <span
+      role="button"
+      style={starStyle}
+      onClick={onRate}
+      onMouseEnter={onHoverIn}
+      onMouseLeave={onHoverOut}
+    >
       {full ? (
         <svg
           xmlns="http://www.w3.org/2000/svg"
