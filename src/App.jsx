@@ -63,28 +63,34 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
+  const [query, setQuery] = useState("dark");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const query = "dark";
+  const tempQuery = "dark";
 
   const getMovies = async () => {
     setIsLoading(true);
     const data = await fetch(`${BASE_URL}/?apikey=${API_KEY}&s=${query}`);
     const json = await data.json();
-    console.log(json.Search);
+    //console.log(json.Search);
     setMovies(json.Search);
     setIsLoading(false);
   };
+
   useEffect(() => {
+    if (query.length < 3) {
+      setMovies([]);
+      return;
+    }
     getMovies();
-  }, []);
+  }, [query]);
 
   return (
     <>
       <NavBar>
-        <Search />
+        <Search query={query} setQuery={setQuery} />
         <NumResults movies={movies} />
       </NavBar>
 
@@ -142,8 +148,7 @@ function Logo() {
   );
 }
 
-function Search() {
-  const [query, setQuery] = useState("");
+function Search({ query, setQuery }) {
   return (
     <input
       className="search"
