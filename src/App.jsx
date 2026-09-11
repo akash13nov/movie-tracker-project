@@ -63,7 +63,7 @@ const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
-  const [query, setQuery] = useState("dark");
+  const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
   const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -73,6 +73,11 @@ export default function App() {
     setIsLoading(true);
     const data = await fetch(`${BASE_URL}/?apikey=${API_KEY}&s=${query}`);
     const json = await data.json();
+
+    if (json.Response === "False") {
+      setMovies([]);
+      return;
+    }
     //console.log(json.Search);
     setMovies(json.Search);
     setIsLoading(false);
@@ -83,6 +88,8 @@ export default function App() {
       setMovies([]);
       return;
     }
+
+    handleCloseMovie();
     getMovies();
   }, [query]);
 
@@ -304,6 +311,22 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
     onCloseMovie();
   }
 
+  useEffect(
+    function () {
+      function callback(e) {
+        if (e.code === "Escape") {
+          onCloseMovie();
+        }
+      }
+      document.addEventListener("keydown", callback);
+
+      return () => {
+        document.removeEventListener("keydown", callback);
+      };
+    },
+    [onCloseMovie],
+  );
+
   const getMovieDetails = async () => {
     setIsLoading(true);
     const data = await fetch(`${BASE_URL}/?apikey=${API_KEY}&i=${selectedId}`);
@@ -319,6 +342,10 @@ function MovieDetails({ selectedId, onCloseMovie, onAddWatched, watched }) {
   useEffect(() => {
     if (!title) return;
     document.title = `Movie | ${title}`;
+
+    return () => {
+      document.title = "movieTracker";
+    };
   }, [title]);
 
   return (
