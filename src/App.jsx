@@ -1,35 +1,21 @@
 import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { API_KEY, BASE_URL } from "./utils/constants";
+import useMovies from "./hooks/useMovies";
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
 
 export default function App() {
   const [query, setQuery] = useState("");
-  const [movies, setMovies] = useState([]);
-  //const [watched, setWatched] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+  const { movies, isLoading } = useMovies(query);
 
+  // const [watched, setWatched] = useState([]);
   const [watched, setWatched] = useState(() => {
     const storedValue = localStorage.getItem("watched");
     return JSON.parse(storedValue);
   });
-
-  const getMovies = async () => {
-    setIsLoading(true);
-    const data = await fetch(`${BASE_URL}/?apikey=${API_KEY}&s=${query}`);
-    const json = await data.json();
-
-    if (json.Response === "False") {
-      setMovies([]);
-      return;
-    }
-    //console.log(json.Search);
-    setMovies(json.Search);
-    setIsLoading(false);
-  };
 
   function handleSelectMovies(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
@@ -51,16 +37,6 @@ export default function App() {
   useEffect(() => {
     localStorage.setItem("watched", JSON.stringify(watched));
   }, [watched]);
-
-  useEffect(() => {
-    if (query.length < 3) {
-      setMovies([]);
-      return;
-    }
-
-    handleCloseMovie();
-    getMovies();
-  }, [query]);
 
   return (
     <>
