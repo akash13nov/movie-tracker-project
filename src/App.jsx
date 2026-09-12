@@ -1,63 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import StarRating from "./StarRating";
 import { API_KEY, BASE_URL } from "./utils/constants";
-
-const tempMovieData = [
-  {
-    imdbID: "tt0468569",
-    Title: "The Dark Knight",
-    Year: "2008",
-    Type: "movie",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMTMxNTMwODM0NF5BMl5BanBnXkFtZTcwODAyMTk2Mw@@._V1_QL75_UX380_CR0,0,380,562_.jpg",
-  },
-  {
-    Title: "The Shawshank Redemption",
-    Year: "1994",
-    imdbID: "tt0111161",
-    Type: "movie",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMDAyY2FhYjctNDc5OS00MDNlLThiMGUtY2UxYWVkNGY2ZjljXkEyXkFqcGc@._V1_QL75_UX380_CR0,4,380,562_.jpg",
-  },
-  {
-    Title: "The Lord of the Rings: The Return of the King",
-    Year: "2003",
-    imdbID: "tt0167260",
-    Type: "movie",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMTZkMjBjNWMtZGI5OC00MGU0LTk4ZTItODg2NWM3NTVmNWQ4XkEyXkFqcGc@._V1_QL75_UX380_CR0,0,380,562_.jpg",
-  },
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-  },
-];
-
-const tempWatchedData = [
-  {
-    imdbID: "tt1375666",
-    Title: "Inception",
-    Year: "2010",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BMjAxMzY3NjcxNF5BMl5BanBnXkFtZTcwNTI5OTM0Mw@@._V1_SX300.jpg",
-    runtime: 148,
-    imdbRating: 8.8,
-    userRating: 10,
-  },
-  {
-    imdbID: "tt0088763",
-    Title: "Back to the Future",
-    Year: "1985",
-    Poster:
-      "https://m.media-amazon.com/images/M/MV5BZmU0M2Y1OGUtZjIxNi00ZjBkLTg1MjgtOWIyNThiZWIwYjRiXkEyXkFqcGdeQXVyMTQxNzMzNDI@._V1_SX300.jpg",
-    runtime: 116,
-    imdbRating: 8.5,
-    userRating: 9,
-  },
-];
 
 const average = (arr) =>
   arr.reduce((acc, cur, i, arr) => acc + cur / arr.length, 0);
@@ -65,9 +8,14 @@ const average = (arr) =>
 export default function App() {
   const [query, setQuery] = useState("");
   const [movies, setMovies] = useState([]);
-  const [watched, setWatched] = useState([]);
+  //const [watched, setWatched] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [selectedId, setSelectedId] = useState(null);
+
+  const [watched, setWatched] = useState(() => {
+    const storedValue = localStorage.getItem("watched");
+    return JSON.parse(storedValue);
+  });
 
   const getMovies = async () => {
     setIsLoading(true);
@@ -83,16 +31,6 @@ export default function App() {
     setIsLoading(false);
   };
 
-  useEffect(() => {
-    if (query.length < 3) {
-      setMovies([]);
-      return;
-    }
-
-    handleCloseMovie();
-    getMovies();
-  }, [query]);
-
   function handleSelectMovies(id) {
     setSelectedId((selectedId) => (id === selectedId ? null : id));
   }
@@ -103,11 +41,26 @@ export default function App() {
 
   function handleAddWatched(movie) {
     setWatched((watched) => [...watched, movie]);
+    //localStorage.setItem("watched", JSON.stringify([...watched, movie]));
   }
 
   function handleDeleteWatched(id) {
     setWatched((watched) => watched.filter((movie) => movie.imdbID !== id));
   }
+
+  useEffect(() => {
+    localStorage.setItem("watched", JSON.stringify(watched));
+  }, [watched]);
+
+  useEffect(() => {
+    if (query.length < 3) {
+      setMovies([]);
+      return;
+    }
+
+    handleCloseMovie();
+    getMovies();
+  }, [query]);
 
   return (
     <>
@@ -191,6 +144,25 @@ function Logo() {
 }
 
 function Search({ query, setQuery }) {
+  const inputEle = useRef(null);
+  //console.log(inputEle.current);
+
+  useEffect(() => {
+    function callback(e) {
+      if (document.activeElement === inputEle.current) return;
+
+      if (e.code === "Enter") {
+        inputEle.current.focus();
+        setQuery("");
+      }
+    }
+    document.addEventListener("keydown", callback);
+
+    return () => {
+      document.removeEventListener("keydown", callback);
+    };
+  }, [setQuery]);
+
   return (
     <input
       className="search"
@@ -198,6 +170,7 @@ function Search({ query, setQuery }) {
       placeholder="Search movies..."
       value={query}
       onChange={(e) => setQuery(e.target.value)}
+      ref={inputEle}
     />
   );
 }
