@@ -107,7 +107,9 @@ function NavBar({ children }) {
 function Logo() {
   return (
     <div className="logo">
-      <span role="img">🎥</span>
+      <span role="img" style={{ display: "flex" }}>
+        <img src="/favicon.svg" style={{ width: "40px" }} />
+      </span>
       <h1>movieTracker</h1>
     </div>
   );
