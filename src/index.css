@@ -59,6 +59,11 @@ body {
   position: relative;
 }
 
+/* Hide scrollbar - Chrome, Safari, new Edge (WebKit) */
+.box::-webkit-scrollbar {
+  display: none;
+}
+
 .loader {
   text-align: center;
   text-transform: uppercase;
